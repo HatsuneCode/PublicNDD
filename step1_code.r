@@ -20,3 +20,25 @@ write.table(cbind(Gene = rownames(expr), expr), 'Raw.counts.txt', sep = '\t', ro
 ## 3. normalize
 expr = RNAseq.Normalize(expr)
 write.table(cbind(Gene = rownames(expr), expr), 'Normalized.counts.txt', sep = '\t', row.names = F)
+
+###
+library("ggrepel")
+library(ggplot2)
+colnames(expr)=sapply(colnames(expr), function(x) {paste0(strsplit(x, "_")[[1]][1],"_",strsplit(x, "_")[[1]][3])})
+expr.f = expr[order(apply(expr, 1, mad), decreasing = T)[1:3e3], ]
+pca = PCA(expr.f)
+pca$group = ifelse(grepl("PD",colnames(expr)),"PD","N")
+pca$group=factor(pca$group,levels=c("PD","N"))
+ggplot(pca, aes(PC1, PC2)) +
+  geom_point(aes(color = group), size = 4, alpha = 0.8) +
+  geom_text_repel(aes(label = sample), size = 4, max.overlaps = 50) +
+  labs(title = "PCA of Top3k Variable Genes",
+       x = 'PC1', y = 'PC2', color = 'Group') +
+  scale_color_brewer(palette = 'Set1') +
+  theme_classic() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 18, face = 'bold'),
+    axis.title = element_text(size = 16), axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14)
+  )
+ggsave('PCA.Top3k.png', width = 9, height = 7, dpi = 300)
