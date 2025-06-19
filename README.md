@@ -2,9 +2,9 @@
 
 ### 已分析数据集
 
-| Dataset_ID | Organism | Disezse | Tissue/cell | Sample_num | DataType |
+| Dataset | Organism | Disease | Tissue/cell | Samples | DataType |
 | -------- | -------- | -------- | -------- | -------- | -------- |
-| GSE156928 | Homo sapiens | parkinson disease | Frontal cortex | D:8,N:6 | Bulk RNA-seq |
+| GSE156928 | Homo sapiens | parkinson disease | Frontal cortex | D:8,N:6 | Bulk-seq |
 | -------- | -------- | -------- | -------- | -------- | -------- |
 
-备注：Sample_num列，D:Disezse N:Normal/Control;
+备注：Samples列，D:Disezse N:Normal
