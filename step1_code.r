@@ -42,3 +42,11 @@ ggplot(pca, aes(PC1, PC2)) +
     legend.text = element_text(size = 14)
   )
 ggsave('PCA.Top3k.png', width = 9, height = 7, dpi = 300)
+
+# 差异分析
+raw_expr=read.table("Raw.counts.txt",header=T,sep="\t",row.names = 1)
+colnames(raw_expr)=sapply(colnames(raw_expr), function(x) {paste0(strsplit(x, "_")[[1]][1],"_",strsplit(x, "_")[[1]][3])})
+pos=colnames(raw_expr)[grep("PD",colnames(raw_expr))]
+neg = colnames(raw_expr)[-grep("PD",colnames(raw_expr))]
+DEG = RNAseq.DESeq2(raw_expr, pos, neg)
+write.table(DEG, 'DEG.DvsCtrl.txt', sep = '\t', row.names = F)
