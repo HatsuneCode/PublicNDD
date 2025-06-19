@@ -21,7 +21,7 @@ write.table(cbind(Gene = rownames(expr), expr), 'Raw.counts.txt', sep = '\t', ro
 expr = RNAseq.Normalize(expr)
 write.table(cbind(Gene = rownames(expr), expr), 'Normalized.counts.txt', sep = '\t', row.names = F)
 
-###
+###PCA
 library("ggrepel")
 library(ggplot2)
 colnames(expr)=sapply(colnames(expr), function(x) {paste0(strsplit(x, "_")[[1]][1],"_",strsplit(x, "_")[[1]][3])})
