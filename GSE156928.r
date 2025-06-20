@@ -5,7 +5,8 @@
 fs = list.files(pattern = 'quant.genes.sf', full.names = T, recursive = T)
 expr = do.call(cbind, lapply(fs, function(f) {
   exp = read.table(f, sep = '\t', header = T)[, c('Name', 'NumReads')]
-  setNames(data.frame(exp$NumReads, row.names = exp$Name), unlist(strsplit(f, '/'))[2] )
+  n   = paste(unlist(strsplit(unlist(strsplit(f, '/'))[2], '_'))[2:3], collapse = '_')
+  setNames(data.frame(exp$NumReads, row.names = exp$Name), n)
 }))
 rownames(expr) = sub('\\..*', '', rownames(expr))
 
@@ -25,8 +26,6 @@ write.table(cbind(Gene = rownames(expr), expr), 'Normalized.counts.txt', sep = '
 library(ggrepel)
 library(ggplot2)
 expr = read.table('Normalized.counts.txt', sep = '\t', header = T, row.names = 1, check.names = F)
-colnames(expr)= sapply(colnames(expr), function(x) 
-  paste0(unlist(strsplit(x, '_'))[2], '_', unlist(strsplit(x, '_'))[3]) )
 expr.f = expr[order(apply(expr, 1, mad), decreasing = T)[1:3e3], ]
 pca    = PCA(expr.f)
 groups = c('PD', 'Ctrl')
@@ -43,9 +42,24 @@ ggsave('PCA.Top3k.png', p, w = 9, h = 7)
 
 ## 5. DEG
 raw = read.table('Raw.counts.txt', sep = '\t', header = T, row.names = 1, check.names = F)
-colnames(raw) = sapply(colnames(raw), function(x)
-  paste0(unlist(strsplit(x, '_'))[2], '_', unlist(strsplit(x, '_'))[3]) )
 pos = grep('PD', colnames(raw), value = T)
 neg = setdiff(colnames(raw), pos)
 DEG = RNAseq.DESeq2(raw, pos, neg, name = 'GSE156928.PD')
 write.table(DEG, 'DEG.PDvsCtrl.txt', sep = '\t', row.names = F)
+
+## 6. GSEA
+#### command
+expr = read.table('Normalized.counts.txt', sep = '\t', header = T, row.names = 1, check.names = F)
+expr.p = expr[,  grepl('PD', colnames(expr))]  
+expr.n = expr[, !grepl('PD', colnames(expr))]
+GSEA.prepare(expr.p, expr.n, 'PD', 'Ctrl', 
+             cmd.out = '/mnt/e/Project/NDD-Database/hsa/GSE156928')
+#### results
+res  = list.files('GSEA', 'gsea_report_for.*.tsv', full.names = T, recursive = T)
+GESA = do.call(rbind, lapply(res, function(f) {
+  gsea = read.table(f, sep = '\t', header = T)
+  gsea = data.frame(Terms = gsea$NAME, NES = gsea$NES, Pvalue = gsea$NOM.p.val)
+  gsea$Sig = ifelse(gsea$Pvalue < .05, 'Yes', 'No')
+  gsea
+}))
+write.table(GSEA, 'GSEA.results.txt', sep = '\t', row.names = F)
