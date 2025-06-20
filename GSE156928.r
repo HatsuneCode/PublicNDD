@@ -49,7 +49,7 @@ write.table(DEG, 'DEG.PDvsCtrl.txt', sep = '\t', row.names = F)
 
 ## 6. GSEA
 #### command
-expr = read.table('Normalized.counts.txt', sep = '\t', header = T, row.names = 1, check.names = F)
+expr   = read.table('Normalized.counts.txt', sep = '\t', header = T, row.names = 1, check.names = F)
 expr.p = expr[,  grepl('PD', colnames(expr))]  
 expr.n = expr[, !grepl('PD', colnames(expr))]
 GSEA.prepare(expr.p, expr.n, 'PD', 'Ctrl', 
